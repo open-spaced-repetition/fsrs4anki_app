@@ -279,9 +279,9 @@ def my_loss(dataset, w):
     # print(f"Loss after training: {dataset['log_loss'].mean():.4f}")
     loss_after = f"{dataset['log_loss'].mean():.4f}"
     return f"""
-*Loss before training*: {loss_before}
+**Loss before training**: {loss_before}
 
-*Loss after training*: {loss_after}
+**Loss after training**: {loss_after}
     """
 
 

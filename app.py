@@ -35,7 +35,8 @@ def anki_optimizer(file, timezone, next_day_starts_at, revlog_start_date, reques
 """
 
     w_markdown = f"""
-    # These are the weights for step 5
+    # Updated Parameters
+    Copy and paste these as shown in step 5 of the instructions:
     `var w = {w};`
     
     Check out the Analysis tab for more detailed information."""
