@@ -36,7 +36,9 @@ def anki_optimizer(file, timezone, next_day_starts_at, revlog_start_date, reques
 
     w_markdown = f"""
     # These are the weights for step 5
-    `var w = {w};`"""
+    `var w = {w};`
+    
+    Check out the Analysis tab for more detailed information."""
     files = ['prediction.tsv', 'revlog.csv', 'revlog_history.tsv', 'stability_for_analysis.tsv',
              'expected_repetitions.csv']
     files_out = [proj_dir / file for file in files]
@@ -90,7 +92,7 @@ with gr.Blocks() as demo:
 
             # Step 3 - Fill in the rest of the settings
 
-            # Step 4 Click run
+            # Step 4 - Click run
             
             # Step 5 - Replace the default parameters in FSRS4Anki with the optimized parameters
             ![](https://miro.medium.com/v2/resize:fit:1252/format:webp/1*NM4CR-n7nDk3nQN1Bi30EA.png)
