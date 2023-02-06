@@ -194,7 +194,7 @@ def train_model(proj_dir, progress=gr.Progress(track_tqdm=True)):
             model.apply(clipper)
             pbar.update()
     pbar.close()
-    for name, param in model.named_parameters():
+    # for name, param in model.named_parameters():
         # print(f"{name}: {list(map(lambda x: round(float(x), 4), param))}")
 
     train_set = dataset[dataset['i'] > 2]
