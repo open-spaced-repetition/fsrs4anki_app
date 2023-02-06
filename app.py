@@ -100,11 +100,10 @@ with gr.Blocks() as demo:
     with gr.Tab("Analysis"):
         with gr.Row():
             markdown_output = gr.Markdown()
-            df_output = gr.DataFrame()
-        with gr.Row():
-            plot_output = gr.Plot()
-        with gr.Row():
-            files_output = gr.Files(label="Analysis Files")
+            with gr.Column():
+                df_output = gr.DataFrame()
+                plot_output = gr.Plot()
+                files_output = gr.Files(label="Analysis Files")
 
     btn_plot.click(anki_optimizer,
                    inputs=[file, timezone, next_day_starts_at, revlog_start_date, requestRetention],
