@@ -52,6 +52,7 @@ with gr.Blocks() as demo:
         with gr.Box():
             gr.Markdown("""
             Based on the [tutorial](https://medium.com/@JarrettYe/how-to-use-the-next-generation-spaced-repetition-algorithm-fsrs-on-anki-5a591ca562e2) of [Jarrett Ye](https://github.com/L-M-Sherlock).
+            This application can give you updated parameters without having to code.
             
             Check out the instructions on the next tab.
             """)
