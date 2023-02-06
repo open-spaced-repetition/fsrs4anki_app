@@ -254,9 +254,9 @@ def process_personalized_collection(requestRetention, w):
             t_history += f',{int(next_t)}'
             d_history += f',{difficulty}'
             r_history += f",3"
-        rating_markdown.append(f"*rating history*: {r_history}")
-        rating_markdown.append(f"*interval history*: {t_history}")
-        rating_markdown.append(f"*difficulty history*: {d_history}\n")
+        rating_markdown.append(f"**rating history**: {r_history}")
+        rating_markdown.append(f"**interval history**: {t_history}")
+        rating_markdown.append(f"**difficulty history**: {d_history}\n")
     rating_markdown = '\n\n'.join(rating_markdown)
     return my_collection, rating_markdown
 
