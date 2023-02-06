@@ -50,7 +50,8 @@ with gr.Blocks() as demo:
     with gr.Tab("FSRS4Anki Optimizer"):
         with gr.Box():
             gr.Markdown("""
-            Based on the [tutorial](https://medium.com/@JarrettYe/how-to-use-the-next-generation-spaced-repetition-algorithm-fsrs-on-anki-5a591ca562e2) of [Jarrett Ye](https://github.com/L-M-Sherlock)
+            Based on the [tutorial](https://medium.com/@JarrettYe/how-to-use-the-next-generation-spaced-repetition-algorithm-fsrs-on-anki-5a591ca562e2) of [Jarrett Ye](https://github.com/L-M-Sherlock).
+            
             Check out the instructions on the next tab.
             """)
         with gr.Box():
@@ -73,11 +74,12 @@ with gr.Blocks() as demo:
     with gr.Tab("Instructions"):
         with gr.Box():
             gr.Markdown("""
-            # How to get personalized Anki parameters
-            If you have been using Anki for some time and have accumulated a lot of review logs, you can try this FSRS4Anki 
-            optimizer app to generate parameters for you.
+            # How to get personalized FSRS Anki parameters
+            If you have been using Anki for some time and have accumulated a lot of review logs, you can try this 
+            FSRS4Anki optimizer app to generate parameters for you.
 
-            This is based on the amazing work of [Jarrett Ye](https://github.com/L-M-Sherlock)
+            This is based on the amazing work of [Jarrett Ye](https://github.com/L-M-Sherlock). My goal is to further 
+            democratize this technology so anyone can use it!
             # Step 1 - Get the review logs to upload
             1. Click the gear icon to the right of a deck’s name 
             2. Export 
