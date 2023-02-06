@@ -272,14 +272,16 @@ def my_loss(dataset, w):
     tqdm.pandas(desc='Calculating Loss before Training')
     dataset = dataset.progress_apply(partial(log_loss, my_collection), axis=1)
     print(f"Loss before training: {dataset['log_loss'].mean():.4f}")
+    loss_before = f"{dataset['log_loss'].mean():.4f}"
     my_collection = Collection(w)
     tqdm.pandas(desc='Calculating Loss After Training')
     dataset = dataset.progress_apply(partial(log_loss, my_collection), axis=1)
     print(f"Loss after training: {dataset['log_loss'].mean():.4f}")
+    loss_after = f"{dataset['log_loss'].mean():.4f}"
     return f"""
-*Loss before training*: {dataset['log_loss'].mean():.4f}
+*Loss before training*: {loss_before}
 
-*Loss after training*: {dataset['log_loss'].mean():.4f}
+*Loss after training*: {loss_after}
     """
 
 
