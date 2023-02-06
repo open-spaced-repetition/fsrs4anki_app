@@ -24,10 +24,10 @@ def get_my_memory_states(proj_dir, dataset, my_collection):
     prediction.reset_index(drop=True, inplace=True)
     prediction.sort_values(by=['r_history'], inplace=True)
     prediction.to_csv(proj_dir / "prediction.tsv", sep='\t', index=None)
-    print("prediction.tsv saved.")
+    # print("prediction.tsv saved.")
     prediction['difficulty'] = prediction['difficulty'].map(lambda x: int(round(x)))
     difficulty_distribution = prediction.groupby(by=['difficulty'])['count'].sum() / prediction['count'].sum()
-    print(difficulty_distribution)
+    # print(difficulty_distribution)
     difficulty_distribution_padding = np.zeros(10)
     for i in range(10):
         if i + 1 in difficulty_distribution.index:

@@ -26,7 +26,7 @@ def extract(file, prefix):
     proj_dir = Path(f'projects/{prefix}_{file.orig_name.replace(".", "_").replace("@", "_")}')
     with ZipFile(file, 'r') as zip_ref:
         zip_ref.extractall(proj_dir)
-        print(f"Extracted {file.orig_name} successfully!")
+        # print(f"Extracted {file.orig_name} successfully!")
     return proj_dir
 
 
@@ -63,7 +63,7 @@ def create_time_series_features(revlog_start_date, timezone, next_day_starts_at,
     df.sort_values(by=['cid', 'id'], inplace=True, ignore_index=True)
     type_sequence = np.array(df['type'])
     df.to_csv(proj_dir / "revlog.csv", index=False)
-    print("revlog.csv saved.")
+    # print("revlog.csv saved.")
     df = df[(df['type'] == 0) | (df['type'] == 1)].copy()
     df['real_days'] = df['review_date'] - timedelta(hours=next_day_starts_at)
     df['real_days'] = pd.DatetimeIndex(df['real_days'].dt.floor('D')).to_julian_date()
@@ -94,7 +94,7 @@ def create_time_series_features(revlog_start_date, timezone, next_day_starts_at,
     df["t_history"] = df["t_history"].map(lambda x: x[1:] if len(x) > 1 else x)
     df["r_history"] = df["r_history"].map(lambda x: x[1:] if len(x) > 1 else x)
     df.to_csv(proj_dir / 'revlog_history.tsv', sep="\t", index=False)
-    print("Trainset saved.")
+    # print("Trainset saved.")
 
     def cal_retention(group: pd.DataFrame) -> pd.DataFrame:
         group['retention'] = round(group['r'].map(lambda x: {1: 0, 2: 1, 3: 1, 4: 1}[x]).mean(), 4)
@@ -103,7 +103,7 @@ def create_time_series_features(revlog_start_date, timezone, next_day_starts_at,
 
     tqdm.pandas(desc='Calculating Retention')
     df = df.groupby(by=['r_history', 'delta_t']).progress_apply(cal_retention)
-    print("Retention calculated.")
+    # print("Retention calculated.")
     df = df.drop(columns=['id', 'cid', 'usn', 'ivl', 'last_lvl', 'factor', 'time', 'type', 'create_date', 'review_date',
                           'real_days', 'r', 't_history'])
     df.drop_duplicates(inplace=True)
@@ -128,7 +128,7 @@ def create_time_series_features(revlog_start_date, timezone, next_day_starts_at,
 
     tqdm.pandas(desc='Calculating Stability')
     df = df.groupby(by=['r_history']).progress_apply(cal_stability)
-    print("Stability calculated.")
+    # print("Stability calculated.")
     df.reset_index(drop=True, inplace=True)
     df.drop_duplicates(inplace=True)
     df.sort_values(by=['r_history'], inplace=True, ignore_index=True)
@@ -144,11 +144,11 @@ def create_time_series_features(revlog_start_date, timezone, next_day_starts_at,
         df['last_recall'] = df['r_history'].map(lambda x: x[-1])
         df = df[df.groupby(['i', 'r_history'])['group_cnt'].transform(max) == df['group_cnt']]
         df.to_csv(proj_dir / 'stability_for_analysis.tsv', sep='\t', index=None)
-        print("1:again, 2:hard, 3:good, 4:easy\n")
-        print(df[df['r_history'].str.contains(r'^[1-4][^124]*$', regex=True)][
-            ['r_history', 'avg_interval', 'avg_retention', 'stability', 'factor', 'group_cnt']].to_string(
-                index=False))
-        print("Analysis saved!")
+        # print("1:again, 2:hard, 3:good, 4:easy\n")
+        # print(df[df['r_history'].str.contains(r'^[1-4][^124]*$', regex=True)][
+        #     ['r_history', 'avg_interval', 'avg_retention', 'stability', 'factor', 'group_cnt']].to_string(
+        #         index=False))
+        # print("Analysis saved!")
 
         df_out = df[df['r_history'].str.contains(r'^[1-4][^124]*$', regex=True)][
             ['r_history', 'avg_interval', 'avg_retention', 'stability', 'factor', 'group_cnt']]
@@ -168,7 +168,7 @@ def train_model(proj_dir, progress=gr.Progress(track_tqdm=True)):
     tqdm.pandas(desc='Tensorizing Line')
     dataset['tensor'] = dataset.progress_apply(lambda x: lineToTensor(list(zip([x['t_history']], [x['r_history']]))[0]),
                                                axis=1)
-    print("Tensorized!")
+    # print("Tensorized!")
 
     pre_train_set = dataset[dataset['i'] == 2]
     # pretrain
@@ -187,7 +187,7 @@ def train_model(proj_dir, progress=gr.Progress(track_tqdm=True)):
                               {1: 0, 2: 1, 3: 1, 4: 1}[row['r']])
             if np.isnan(loss.data.item()):
                 # Exception Case
-                print(row, output_t)
+                # print(row, output_t)
                 raise Exception('error case')
             loss.backward()
             optimizer.step()
@@ -195,7 +195,7 @@ def train_model(proj_dir, progress=gr.Progress(track_tqdm=True)):
             pbar.update()
     pbar.close()
     for name, param in model.named_parameters():
-        print(f"{name}: {list(map(lambda x: round(float(x), 4), param))}")
+        # print(f"{name}: {list(map(lambda x: round(float(x), 4), param))}")
 
     train_set = dataset[dataset['i'] > 2]
     epoch_len = len(train_set)
@@ -214,7 +214,7 @@ def train_model(proj_dir, progress=gr.Progress(track_tqdm=True)):
                               {1: 0, 2: 1, 3: 1, 4: 1}[row['r']])
             if np.isnan(loss.data.item()):
                 # Exception Case
-                print(row, output_t)
+                # print(row, output_t)
                 raise Exception('error case')
             loss.backward()
             for param in model.parameters():
@@ -223,15 +223,15 @@ def train_model(proj_dir, progress=gr.Progress(track_tqdm=True)):
             model.apply(clipper)
             pbar.update()
 
-            if (k * epoch_len + i) % print_len == 0:
-                print(f"iteration: {k * epoch_len + i + 1}")
-                for name, param in model.named_parameters():
-                    print(f"{name}: {list(map(lambda x: round(float(x), 4), param))}")
+            # if (k * epoch_len + i) % print_len == 0:
+                # print(f"iteration: {k * epoch_len + i + 1}")
+                # for name, param in model.named_parameters():
+                    # print(f"{name}: {list(map(lambda x: round(float(x), 4), param))}")
     pbar.close()
 
     w = list(map(lambda x: round(float(x), 4), dict(model.named_parameters())['w'].data))
 
-    print("\nTraining finished!")
+    # print("\nTraining finished!")
     return w, dataset
 
 
@@ -271,12 +271,12 @@ def my_loss(dataset, w):
     my_collection = Collection(init_w)
     tqdm.pandas(desc='Calculating Loss before Training')
     dataset = dataset.progress_apply(partial(log_loss, my_collection), axis=1)
-    print(f"Loss before training: {dataset['log_loss'].mean():.4f}")
+    # print(f"Loss before training: {dataset['log_loss'].mean():.4f}")
     loss_before = f"{dataset['log_loss'].mean():.4f}"
     my_collection = Collection(w)
     tqdm.pandas(desc='Calculating Loss After Training')
     dataset = dataset.progress_apply(partial(log_loss, my_collection), axis=1)
-    print(f"Loss after training: {dataset['log_loss'].mean():.4f}")
+    # print(f"Loss after training: {dataset['log_loss'].mean():.4f}")
     loss_after = f"{dataset['log_loss'].mean():.4f}"
     return f"""
 *Loss before training*: {loss_before}

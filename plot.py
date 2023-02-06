@@ -41,7 +41,7 @@ def make_plot(proj_dir, type_sequence, w, difficulty_distribution_padding, progr
             return w[9] * np.power(d, w[10]) * np.power(s, w[11]) * np.exp((1 - r) * w[12])
 
     stability_list = np.array([np.power(base, i - index_offset) for i in range(index_len)])
-    print(f"terminal stability: {stability_list.max(): .2f}")
+    # print(f"terminal stability: {stability_list.max(): .2f}")
     df = pd.DataFrame(columns=["retention", "difficulty", "repetitions"])
 
     for percentage in trange(96, 70, -2, desc='Repetition vs Retention plot'):
@@ -73,7 +73,7 @@ def make_plot(proj_dir, type_sequence, w, difficulty_distribution_padding, progr
 
     df.sort_values(by=["difficulty", "retention"], inplace=True)
     df.to_csv(proj_dir/"expected_repetitions.csv", index=False)
-    print("expected_repetitions.csv saved.")
+    # print("expected_repetitions.csv saved.")
 
     optimal_retention_list = np.zeros(10)
     df2 = pd.DataFrame()
@@ -87,6 +87,6 @@ def make_plot(proj_dir, type_sequence, w, difficulty_distribution_padding, progr
 
     fig = px.line(df2, x="retention", y="expected repetitions", color='d', log_y=True)
 
-    print(f"\n-----suggested retention: {np.inner(difficulty_distribution_padding, optimal_retention_list):.2f}-----")
+    # print(f"\n-----suggested retention: {np.inner(difficulty_distribution_padding, optimal_retention_list):.2f}-----")
     suggested_retention_markdown = f"""# Suggested Retention: `{np.inner(difficulty_distribution_padding, optimal_retention_list):.2f}`"""
     return fig, suggested_retention_markdown
