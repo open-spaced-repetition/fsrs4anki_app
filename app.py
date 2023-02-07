@@ -37,6 +37,7 @@ def anki_optimizer(file, timezone, next_day_starts_at, revlog_start_date, reques
     w_markdown = f"""
     # Updated Parameters
     Copy and paste these as shown in step 5 of the instructions:
+    
     `var w = {w};`
     
     Check out the Analysis tab for more detailed information."""
@@ -46,29 +47,30 @@ def anki_optimizer(file, timezone, next_day_starts_at, revlog_start_date, reques
     cleanup(proj_dir, files)
     return w_markdown, df_out, fig, markdown_out, files_out
 
+description = """
+# FSRS4Anki Optimizer App
+Based on the [tutorial](https://medium.com/@JarrettYe/how-to-use-the-next-generation-spaced-repetition-algorithm-fsrs-on-anki-5a591ca562e2) 
+of [Jarrett Ye](https://github.com/L-M-Sherlock). This application can give you personalized parameters without having to code.
+
+Read the `Instructions` if its your first time using the app.
+"""
 
 with gr.Blocks() as demo:
     with gr.Tab("FSRS4Anki Optimizer"):
         with gr.Box():
-            gr.Markdown("""
-            Based on the [tutorial](https://medium.com/@JarrettYe/how-to-use-the-next-generation-spaced-repetition-algorithm-fsrs-on-anki-5a591ca562e2) of [Jarrett Ye](https://github.com/L-M-Sherlock).
-            This application can give you updated parameters without having to code.
-            
-            Check out the instructions on the next tab.
-            """)
+            gr.Markdown(description)
         with gr.Box():
             with gr.Row():
-                file = gr.File(label='Review Logs')
-                timezone = gr.Dropdown(label="Choose your timezone", choices=pytz.all_timezones)
-            with gr.Row():
-                next_day_starts_at = gr.Number(value=4,
-                                               label="Replace it with your Anki's setting in Preferences -> Scheduling.",
-                                               precision=0)
-                with gr.Accordion(label="Advanced Settings", open=False):
-                    requestRetention = gr.Number(value=.9, label="Recommended to set between 0.8  0.9")
-            with gr.Row():
-                revlog_start_date = gr.Textbox(value="2006-10-05",
-                                               label="Replace it if you don't want the optimizer to use the review logs before a specific date.")
+                file = gr.File(label='Review Logs (Step 1)')
+                with gr.Column():
+                    next_day_starts_at = gr.Number(value=4,
+                                                   label="Next Day Starts at (Step 2)",
+                                                   precision=0)
+                    timezone = gr.Dropdown(label="Timezone (Step 3.1)", choices=pytz.all_timezones)
+                    with gr.Accordion(label="Advanced Settings (Step 3.2)", open=False):
+                        requestRetention = gr.Number(value=.9, label="Recommended to set between 0.8  0.9")
+                        revlog_start_date = gr.Textbox(value="2006-10-05",
+                                                       label="Replace it if you don't want the optimizer to use the review logs before a specific date.")
         with gr.Row():
             btn_plot = gr.Button('Optimize your Anki!')
         with gr.Row():
@@ -82,23 +84,27 @@ with gr.Blocks() as demo:
 
             This is based on the amazing work of [Jarrett Ye](https://github.com/L-M-Sherlock). My goal is to further 
             democratize this technology so anyone can use it!
-            # Step 1 - Get the review logs to upload
+            # Step 1 - Get the `Review Logs` to upload
             1. Click the gear icon to the right of a deck’s name 
             2. Export 
             3. Check “Include scheduling information” and “Support older Anki versions”
             ![](https://miro.medium.com/v2/resize:fit:1400/format:webp/1*W3Nnfarki2z7Ukyom4kMuw.png)
             4. Export and upload that file to the app
 
-            # Step 2 - Get the `next_day_starts_at` parameter
+            # Step 2 - Get the `Next Day Starts At` parameter
             1. Open preferences
             2. Copy the next day starts at value and paste it in the app
             ![](https://miro.medium.com/v2/resize:fit:1072/format:webp/1*qAUb6ry8UxFeCsjnKLXvsQ.png)
 
             # Step 3 - Fill in the rest of the settings
+            1. Your `Time Zone`
+            2. `Advanced settings` if you know what you are doing
 
-            # Step 4 - Click run
+            # Step 4 - Click `Optimize your Anki!`
+            1. After it runs copy `var w = [...]`
+            2. Check out the analysis tab for more info
             
-            # Step 5 - Replace the default parameters in FSRS4Anki with the optimized parameters
+            # Step 5 - Update FSRS4Anki with the optimized parameters
             ![](https://miro.medium.com/v2/resize:fit:1252/format:webp/1*NM4CR-n7nDk3nQN1Bi30EA.png)
             """)
     with gr.Tab("Analysis"):
@@ -112,6 +118,6 @@ with gr.Blocks() as demo:
     btn_plot.click(anki_optimizer,
                    inputs=[file, timezone, next_day_starts_at, revlog_start_date, requestRetention],
                    outputs=[w_output, df_output, plot_output, markdown_output, files_output])
-demo.queue().launch(debug=True, show_error=True)
 
-# demo.queue().launch(debug=True)
+if __name__ == '__main__':
+    demo.queue().launch(show_error=True)
