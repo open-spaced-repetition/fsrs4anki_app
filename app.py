@@ -80,7 +80,7 @@ with gr.Blocks() as demo:
                                                    precision=0)
                     timezone = gr.Dropdown(label="Timezone (Step 3.1)", choices=pytz.all_timezones)
                     with gr.Accordion(label="Advanced Settings (Step 3.2)", open=False):
-                        requestRetention = gr.Number(value=.9, label="Recommended to set between 0.8  0.9")
+                        requestRetention = gr.Number(value=.9, label="Desired Retention: Recommended to set between 0.8  0.9")
                         revlog_start_date = gr.Textbox(value="2006-10-05",
                                                        label="Replace it if you don't want the optimizer to use the review logs before a specific date.")
         with gr.Row():
