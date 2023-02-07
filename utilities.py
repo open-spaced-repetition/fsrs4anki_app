@@ -34,7 +34,7 @@ def create_time_series_features(revlog_start_date, timezone, next_day_starts_at,
                                 progress=gr.Progress(track_tqdm=True)):
     if os.path.isfile(proj_dir / "collection.anki21b"):
         os.remove(proj_dir / "collection.anki21b")
-        raise Exception(
+        raise gr.Error(
                 "Please export the file with `support older Anki versions` if you use the latest version of Anki.")
     elif os.path.isfile(proj_dir / "collection.anki21"):
         con = sqlite3.connect(proj_dir / "collection.anki21")
