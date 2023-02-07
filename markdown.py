@@ -30,6 +30,10 @@ democratize this technology so anyone can use it!
 """
 
 faq_markdown = """
+Where can I find more information on FSRS?
+
+Check out the plugin [wiki](https://github.com/open-spaced-repetition/fsrs4anki/wiki)
+
 What is the original paper?
 
 You can find it here: [https://www.maimemo.com/paper/](https://www.maimemo.com/paper/)
