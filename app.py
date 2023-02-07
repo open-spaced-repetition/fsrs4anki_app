@@ -5,6 +5,7 @@ from datetime import datetime
 
 from utilities import extract, create_time_series_features, train_model, process_personalized_collection, my_loss, \
     cleanup
+from markdown import instructions_markdown, faq_markdown
 from memory_states import get_my_memory_states
 from plot import make_plot
 
@@ -88,36 +89,7 @@ with gr.Blocks() as demo:
             w_output = gr.Markdown()
     with gr.Tab("Instructions"):
         with gr.Box():
-            gr.Markdown("""
-            # How to get personalized FSRS Anki parameters
-            If you have been using Anki for some time and have accumulated a lot of review logs, you can try this 
-            FSRS4Anki optimizer app to generate parameters for you.
-
-            This is based on the amazing work of [Jarrett Ye](https://github.com/L-M-Sherlock). My goal is to further 
-            democratize this technology so anyone can use it!
-            # Step 1 - Get the `Review Logs` to upload
-            1. Click the gear icon to the right of a deck’s name 
-            2. Export 
-            3. Check “Include scheduling information” and “Support older Anki versions”
-            ![](https://miro.medium.com/v2/resize:fit:1400/format:webp/1*W3Nnfarki2z7Ukyom4kMuw.png)
-            4. Export and upload that file to the app
-
-            # Step 2 - Get the `Next Day Starts At` parameter
-            1. Open preferences
-            2. Copy the next day starts at value and paste it in the app
-            ![](https://miro.medium.com/v2/resize:fit:1072/format:webp/1*qAUb6ry8UxFeCsjnKLXvsQ.png)
-
-            # Step 3 - Fill in the rest of the settings
-            1. Your `Time Zone`
-            2. `Advanced settings` if you know what you are doing
-
-            # Step 4 - Click `Optimize your Anki!`
-            1. After it runs copy `var w = [...]`
-            2. Check out the analysis tab for more info
-            
-            # Step 5 - Update FSRS4Anki with the optimized parameters
-            ![](https://miro.medium.com/v2/resize:fit:1252/format:webp/1*NM4CR-n7nDk3nQN1Bi30EA.png)
-            """)
+            gr.Markdown(instructions_markdown)
     with gr.Tab("Analysis"):
         with gr.Row():
             markdown_output = gr.Markdown()
@@ -125,6 +97,8 @@ with gr.Blocks() as demo:
                 df_output = gr.DataFrame()
                 plot_output = gr.Plot()
                 files_output = gr.Files(label="Analysis Files")
+    with gr.Tab("FAQ"):
+        gr.Markdown(faq_markdown)
 
     btn_plot.click(anki_optimizer,
                    inputs=[file, timezone, next_day_starts_at, revlog_start_date, requestRetention, fast_mode_in],
