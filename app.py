@@ -9,13 +9,32 @@ from memory_states import get_my_memory_states
 from plot import make_plot
 
 
-def anki_optimizer(file, timezone, next_day_starts_at, revlog_start_date, requestRetention,
+def get_w_markdown(w):
+    return f"""
+    # Updated Parameters
+    Copy and paste these as shown in step 5 of the instructions:
+
+    `var w = {w};`
+    Check out the Analysis tab for more detailed information."""
+
+
+def anki_optimizer(file, timezone, next_day_starts_at, revlog_start_date, requestRetention, fast_mode,
                    progress=gr.Progress(track_tqdm=True)):
     now = datetime.now()
+    files = ['prediction.tsv', 'revlog.csv', 'revlog_history.tsv', 'stability_for_analysis.tsv',
+             'expected_repetitions.csv']
     prefix = now.strftime(f'%Y_%m_%d_%H_%M_%S')
+
     proj_dir = extract(file, prefix)
+
     type_sequence, df_out = create_time_series_features(revlog_start_date, timezone, next_day_starts_at, proj_dir)
     w, dataset = train_model(proj_dir)
+    w_markdown = get_w_markdown(w)
+    cleanup(proj_dir, files)
+    if fast_mode:
+        files_out = [proj_dir / file for file in files if (proj_dir / file).exists()]
+        return w_markdown, None, None, "", files_out
+
     my_collection, rating_markdown = process_personalized_collection(requestRetention, w)
     difficulty_distribution_padding, difficulty_distribution = get_my_memory_states(proj_dir, dataset, my_collection)
     fig, suggested_retention_markdown = make_plot(proj_dir, type_sequence, w, difficulty_distribution_padding)
@@ -33,19 +52,9 @@ def anki_optimizer(file, timezone, next_day_starts_at, revlog_start_date, reques
 # Ratings
 {rating_markdown}
 """
-
-    w_markdown = f"""
-    # Updated Parameters
-    Copy and paste these as shown in step 5 of the instructions:
-    
-    `var w = {w};`
-    
-    Check out the Analysis tab for more detailed information."""
-    files = ['prediction.tsv', 'revlog.csv', 'revlog_history.tsv', 'stability_for_analysis.tsv',
-             'expected_repetitions.csv']
-    files_out = [proj_dir / file for file in files]
-    cleanup(proj_dir, files)
+    files_out = [proj_dir / file for file in files if (proj_dir / file).exists()]
     return w_markdown, df_out, fig, markdown_out, files_out
+
 
 description = """
 # FSRS4Anki Optimizer App
@@ -61,7 +70,9 @@ with gr.Blocks() as demo:
             gr.Markdown(description)
         with gr.Box():
             with gr.Row():
-                file = gr.File(label='Review Logs (Step 1)')
+                with gr.Column():
+                    file = gr.File(label='Review Logs (Step 1)')
+                    fast_mode_in = gr.Checkbox(value=False, label="Fast Mode (No analysis)")
                 with gr.Column():
                     next_day_starts_at = gr.Number(value=4,
                                                    label="Next Day Starts at (Step 2)",
@@ -116,7 +127,7 @@ with gr.Blocks() as demo:
                 files_output = gr.Files(label="Analysis Files")
 
     btn_plot.click(anki_optimizer,
-                   inputs=[file, timezone, next_day_starts_at, revlog_start_date, requestRetention],
+                   inputs=[file, timezone, next_day_starts_at, revlog_start_date, requestRetention, fast_mode_in],
                    outputs=[w_output, df_output, plot_output, markdown_output, files_output])
 
 if __name__ == '__main__':
