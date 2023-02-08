@@ -73,7 +73,7 @@ with gr.Blocks() as demo:
             with gr.Row():
                 with gr.Column():
                     file = gr.File(label='Review Logs (Step 1)')
-                    fast_mode_in = gr.Checkbox(value=False, label="Fast Mode (No analysis)")
+                    fast_mode_in = gr.Checkbox(value=False, label="Fast Mode (Will just return the optimized weights)")
                 with gr.Column():
                     next_day_starts_at = gr.Number(value=4,
                                                    label="Next Day Starts at (Step 2)",
