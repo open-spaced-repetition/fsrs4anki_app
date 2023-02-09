@@ -28,7 +28,7 @@ def anki_optimizer(file, timezone, next_day_starts_at, revlog_start_date, reques
 
     proj_dir = extract(file, prefix)
 
-    type_sequence, df_out = create_time_series_features(revlog_start_date, timezone, next_day_starts_at, proj_dir)
+    type_sequence, time_sequence, df_out = create_time_series_features(revlog_start_date, timezone, next_day_starts_at, proj_dir)
     w, dataset = train_model(proj_dir)
     w_markdown = get_w_markdown(w)
     cleanup(proj_dir, files)
@@ -38,7 +38,7 @@ def anki_optimizer(file, timezone, next_day_starts_at, revlog_start_date, reques
 
     my_collection, rating_markdown = process_personalized_collection(requestRetention, w)
     difficulty_distribution_padding, difficulty_distribution = get_my_memory_states(proj_dir, dataset, my_collection)
-    fig, suggested_retention_markdown = make_plot(proj_dir, type_sequence, w, difficulty_distribution_padding)
+    fig, suggested_retention_markdown = make_plot(proj_dir, type_sequence, time_sequence, w, difficulty_distribution_padding)
     loss_markdown = my_loss(dataset, w)
     difficulty_distribution = difficulty_distribution.to_string().replace("\n", "\n\n")
     markdown_out = f"""
@@ -58,7 +58,7 @@ def anki_optimizer(file, timezone, next_day_starts_at, revlog_start_date, reques
 
 
 description = """
-# FSRS4Anki Optimizer App - v3.10.1
+# FSRS4Anki Optimizer App - v3.13.0
 Based on the [tutorial](https://medium.com/@JarrettYe/how-to-use-the-next-generation-spaced-repetition-algorithm-fsrs-on-anki-5a591ca562e2) 
 of [Jarrett Ye](https://github.com/L-M-Sherlock). This application can give you personalized anki parameters without having to code.
 

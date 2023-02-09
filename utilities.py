@@ -62,6 +62,7 @@ def create_time_series_features(revlog_start_date, timezone, next_day_starts_at,
     df.drop(df[df['review_date'].dt.year < 2006].index, inplace=True)
     df.sort_values(by=['cid', 'id'], inplace=True, ignore_index=True)
     type_sequence = np.array(df['type'])
+    time_sequence = np.array(df['time'])
     df.to_csv(proj_dir / "revlog.csv", index=False)
     # print("revlog.csv saved.")
     df = df[(df['type'] == 0) | (df['type'] == 1)].copy()
@@ -152,7 +153,7 @@ def create_time_series_features(revlog_start_date, timezone, next_day_starts_at,
 
         df_out = df[df['r_history'].str.contains(r'^[1-4][^124]*$', regex=True)][
             ['r_history', 'avg_interval', 'avg_retention', 'stability', 'factor', 'group_cnt']]
-    return type_sequence, df_out
+    return type_sequence, time_sequence, df_out
 
 
 def train_model(proj_dir, progress=gr.Progress(track_tqdm=True)):

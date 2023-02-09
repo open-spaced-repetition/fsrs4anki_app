@@ -2,7 +2,24 @@ import numpy as np
 import torch
 from torch import nn
 
-init_w = [1, 1, 5, -0.5, -0.5, 0.2, 1.4, -0.02, 0.8, 2, -0.2, 0.5, 1]
+init_w = [1, 1, 5, -0.5, -0.5, 0.2, 1.4, -0.12, 0.8, 2, -0.2, 0.2, 1]
+'''
+w[0]: initial_stability_for_again_answer
+w[1]: initial_stability_step_per_rating
+w[2]: initial_difficulty_for_good_answer
+w[3]: initial_difficulty_step_per_rating
+w[4]: next_difficulty_step_per_rating
+w[5]: next_difficulty_reversion_to_mean_speed (used to avoid ease hell)
+w[6]: next_stability_factor_after_success
+w[7]: next_stability_stabilization_decay_after_success
+w[8]: next_stability_retrievability_gain_after_success
+w[9]: next_stability_factor_after_failure
+w[10]: next_stability_difficulty_decay_after_success
+w[11]: next_stability_stability_gain_after_failure
+w[12]: next_stability_retrievability_gain_after_failure
+For more details about the parameters, please see: 
+https://github.com/open-spaced-repetition/fsrs4anki/wiki/Free-Spaced-Repetition-Scheduler
+'''
 
 
 class FSRS(nn.Module):
@@ -54,19 +71,19 @@ class WeightClipper(object):
     def __call__(self, module):
         if hasattr(module, 'w'):
             w = module.w.data
-            w[0] = w[0].clamp(0.1, 10)  # initStability
-            w[1] = w[1].clamp(0.1, 5)  # initStabilityRatingFactor
-            w[2] = w[2].clamp(1, 10)  # initDifficulty
-            w[3] = w[3].clamp(-5, -0.1)  # initDifficultyRatingFactor
-            w[4] = w[4].clamp(-5, -0.1)  # updateDifficultyRatingFactor
-            w[5] = w[5].clamp(0, 0.5)  # difficultyMeanReversionFactor
-            w[6] = w[6].clamp(0, 2)  # recallFactor
-            w[7] = w[7].clamp(-0.2, -0.01)  # recallStabilityDecay
-            w[8] = w[8].clamp(0.01, 1.5)  # recallRetrievabilityFactor
-            w[9] = w[9].clamp(0.5, 5)  # forgetFactor
-            w[10] = w[10].clamp(-2, -0.01)  # forgetDifficultyDecay
-            w[11] = w[11].clamp(0.01, 0.9)  # forgetStabilityDecay
-            w[12] = w[12].clamp(0.01, 2)  # forgetRetrievabilityFactor
+            w[0] = w[0].clamp(0.1, 10)
+            w[1] = w[1].clamp(0.1, 5)
+            w[2] = w[2].clamp(1, 10)
+            w[3] = w[3].clamp(-5, -0.1)
+            w[4] = w[4].clamp(-5, -0.1)
+            w[5] = w[5].clamp(0, 0.5)
+            w[6] = w[6].clamp(0, 2)
+            w[7] = w[7].clamp(-0.2, -0.01)
+            w[8] = w[8].clamp(0.01, 1.5)
+            w[9] = w[9].clamp(0.5, 5)
+            w[10] = w[10].clamp(-2, -0.01)
+            w[11] = w[11].clamp(0.01, 0.9)
+            w[12] = w[12].clamp(0.01, 2)
             module.w.data = w
 
 
