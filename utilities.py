@@ -51,8 +51,7 @@ def create_time_series_features(revlog_start_date, timezone, next_day_starts_at,
                   'last_lvl', 'factor', 'time', 'type']
     df = df[(df['cid'] <= time.time() * 1000) &
             (df['id'] <= time.time() * 1000) &
-            (df['r'] > 0) &
-            (df['id'] >= time.mktime(datetime.strptime(revlog_start_date, "%Y-%m-%d").timetuple()) * 1000)].copy()
+            (df['r'] > 0)].copy()
     df['create_date'] = pd.to_datetime(df['cid'] // 1000, unit='s')
     df['create_date'] = df['create_date'].dt.tz_localize(
             'UTC').dt.tz_convert(timezone)
@@ -92,6 +91,7 @@ def create_time_series_features(revlog_start_date, timezone, next_day_starts_at,
 
     tqdm.pandas(desc='Saving Trainset')
     df = df.groupby('cid', as_index=False).progress_apply(get_feature)
+    df = df[df['id'] >= time.mktime(datetime.strptime(revlog_start_date, "%Y-%m-%d").timetuple()) * 1000]
     df["t_history"] = df["t_history"].map(lambda x: x[1:] if len(x) > 1 else x)
     df["r_history"] = df["r_history"].map(lambda x: x[1:] if len(x) > 1 else x)
     df.to_csv(proj_dir / 'revlog_history.tsv', sep="\t", index=False)
