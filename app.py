@@ -16,6 +16,7 @@ def get_w_markdown(w):
     Copy and paste these as shown in step 5 of the instructions:
 
     `var w = {w};`
+    
     Check out the Analysis tab for more detailed information."""
 
 
