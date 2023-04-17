@@ -15,7 +15,7 @@ def get_w_markdown(w):
     # Updated Parameters
     Copy and paste these as shown in step 5 of the instructions:
 
-    `var w = {w};`
+    `{w}`
     
     Check out the Analysis tab for more detailed information."""
 
@@ -59,7 +59,7 @@ def anki_optimizer(file, timezone, next_day_starts_at, revlog_start_date, reques
 
 
 description = """
-# FSRS4Anki Optimizer App - v3.13.3
+# FSRS4Anki Optimizer App - v3.14.7
 Based on the [tutorial](https://medium.com/@JarrettYe/how-to-use-the-next-generation-spaced-repetition-algorithm-fsrs-on-anki-5a591ca562e2) 
 of [Jarrett Ye](https://github.com/L-M-Sherlock). This application can give you personalized anki parameters without having to code.
 

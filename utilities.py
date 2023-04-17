@@ -64,9 +64,9 @@ def create_time_series_features(revlog_start_date, timezone, next_day_starts_at,
     time_sequence = np.array(df['time'])
     df.to_csv(proj_dir / "revlog.csv", index=False)
     # print("revlog.csv saved.")
-    df = df[(df['type'] == 0) | (df['type'] == 1)].copy()
+    df = df[df['type'] != 3].copy()
     df['real_days'] = df['review_date'] - timedelta(hours=next_day_starts_at)
-    df['real_days'] = pd.DatetimeIndex(df['real_days'].dt.floor('D')).to_julian_date()
+    df['real_days'] = pd.DatetimeIndex(df['real_days'].dt.floor('D', ambiguous='infer', nonexistent='shift_forward')).to_julian_date()
     df.drop_duplicates(['cid', 'real_days'], keep='first', inplace=True)
     df['delta_t'] = df.real_days.diff()
     df.dropna(inplace=True)
@@ -78,8 +78,14 @@ def create_time_series_features(revlog_start_date, timezone, next_day_starts_at,
 
     # code from https://github.com/L-M-Sherlock/anki_revlog_analysis/blob/main/revlog_analysis.py
     def get_feature(x):
+        last_kind = None
         for idx, log in enumerate(x.itertuples()):
+            if last_kind is not None and last_kind in (1, 2) and log.type == 0:
+                return x.iloc[:idx]
+            last_kind = log.type
             if idx == 0:
+                if log.type != 0:
+                    return x.iloc[:idx]
                 x.iloc[idx, col_idx['delta_t']] = 0
             if idx == x.shape[0] - 1:
                 break
@@ -90,7 +96,7 @@ def create_time_series_features(revlog_start_date, timezone, next_day_starts_at,
         return x
 
     tqdm.pandas(desc='Saving Trainset')
-    df = df.groupby('cid', as_index=False).progress_apply(get_feature)
+    df = df.groupby('cid', as_index=False, group_keys=False).progress_apply(get_feature)
     df = df[df['id'] >= time.mktime(datetime.strptime(revlog_start_date, "%Y-%m-%d").timetuple()) * 1000]
     df["t_history"] = df["t_history"].map(lambda x: x[1:] if len(x) > 1 else x)
     df["r_history"] = df["r_history"].map(lambda x: x[1:] if len(x) > 1 else x)
@@ -108,16 +114,19 @@ def create_time_series_features(revlog_start_date, timezone, next_day_starts_at,
     df = df.drop(columns=['id', 'cid', 'usn', 'ivl', 'last_lvl', 'factor', 'time', 'type', 'create_date', 'review_date',
                           'real_days', 'r', 't_history'])
     df.drop_duplicates(inplace=True)
-    df = df[(df['retention'] < 1) & (df['retention'] > 0)]
+    df['retention'] = df['retention'].map(lambda x: max(min(0.99, x), 0.01))
 
     def cal_stability(group: pd.DataFrame) -> pd.DataFrame:
+        group_cnt = sum(group['total_cnt'])
+        if group_cnt < 10:
+            return pd.DataFrame()
+        group['group_cnt'] = group_cnt
         if group['i'].values[0] > 1:
             r_ivl_cnt = sum(group['delta_t'] * group['retention'].map(np.log) * pow(group['total_cnt'], 2))
             ivl_ivl_cnt = sum(group['delta_t'].map(lambda x: x ** 2) * pow(group['total_cnt'], 2))
             group['stability'] = round(np.log(0.9) / (r_ivl_cnt / ivl_ivl_cnt), 1)
         else:
             group['stability'] = 0.0
-        group['group_cnt'] = sum(group['total_cnt'])
         group['avg_retention'] = round(
                 sum(group['retention'] * pow(group['total_cnt'], 2)) / sum(pow(group['total_cnt'], 2)), 3)
         group['avg_interval'] = round(
@@ -128,7 +137,7 @@ def create_time_series_features(revlog_start_date, timezone, next_day_starts_at,
         return group
 
     tqdm.pandas(desc='Calculating Stability')
-    df = df.groupby(by=['r_history']).progress_apply(cal_stability)
+    df = df.groupby(by=['r_history'], group_keys=False).progress_apply(cal_stability)
     # print("Stability calculated.")
     df.reset_index(drop=True, inplace=True)
     df.drop_duplicates(inplace=True)
@@ -143,7 +152,7 @@ def create_time_series_features(revlog_start_date, timezone, next_day_starts_at,
         df['factor'] = round(df['stability'] / df['last_stability'], 2)
         df = df[(df['i'] >= 2) & (df['group_cnt'] >= 100)]
         df['last_recall'] = df['r_history'].map(lambda x: x[-1])
-        df = df[df.groupby(['i', 'r_history'])['group_cnt'].transform(max) == df['group_cnt']]
+        df = df[df.groupby(['i', 'r_history'], group_keys=False)['group_cnt'].transform(max) == df['group_cnt']]
         df.to_csv(proj_dir / 'stability_for_analysis.tsv', sep='\t', index=None)
         # print("1:again, 2:hard, 3:good, 4:easy\n")
         # print(df[df['r_history'].str.contains(r'^[1-4][^124]*$', regex=True)][
