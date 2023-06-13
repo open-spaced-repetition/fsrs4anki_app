@@ -1,14 +1,11 @@
 import gradio as gr
 import pytz
-
+import os
 from datetime import datetime
-
-from utilities import extract, create_time_series_features, train_model, process_personalized_collection, my_loss, \
-    cleanup
 from markdown import instructions_markdown, faq_markdown
-from memory_states import get_my_memory_states
-from plot import make_plot
-
+from fsrs4anki_optimizer import Optimizer
+from pathlib import Path
+from utilities import cleanup
 
 def get_w_markdown(w):
     return f"""
@@ -20,30 +17,38 @@ def get_w_markdown(w):
     Check out the Analysis tab for more detailed information."""
 
 
-def anki_optimizer(file, timezone, next_day_starts_at, revlog_start_date, requestRetention, fast_mode,
+def anki_optimizer(file: gr.File, timezone, next_day_starts_at, revlog_start_date, requestRetention,
                    progress=gr.Progress(track_tqdm=True)):
     now = datetime.now()
     files = ['prediction.tsv', 'revlog.csv', 'revlog_history.tsv', 'stability_for_analysis.tsv',
-             'expected_repetitions.csv']
+             'expected_time.csv', 'evaluation.tsv']
     prefix = now.strftime(f'%Y_%m_%d_%H_%M_%S')
+    suffix = file.name.split('/')[-1].replace(".", "_").replace("@", "_")
+    proj_dir = Path(f'projects/{prefix}/{suffix}')
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    print(proj_dir)
+    os.chdir(proj_dir)
+    proj_dir = Path('.')
+    optimizer = Optimizer()
+    optimizer.anki_extract(file.name)
+    analysis_markdown = optimizer.create_time_series(timezone, revlog_start_date, next_day_starts_at).replace("\n", "\n\n")
+    optimizer.define_model()
+    optimizer.train()
+    w_markdown = get_w_markdown(optimizer.w)
+    optimizer.predict_memory_states()
+    difficulty_distribution = optimizer.difficulty_distribution.to_string().replace("\n", "\n\n")
+    plot_output = optimizer.find_optimal_retention()[0]
+    suggested_retention_markdown = f"""# Suggested Retention: `{optimizer.optimal_retention:.2f}`"""
+    rating_markdown = optimizer.preview(requestRetention).replace("\n", "\n\n")
+    loss_before, loss_after = optimizer.evaluate()
+    loss_markdown = f"""
+**Loss before training**: {loss_before}
 
-    proj_dir = extract(file, prefix)
-
-    type_sequence, time_sequence, df_out = create_time_series_features(revlog_start_date, timezone, next_day_starts_at, proj_dir)
-    w, dataset = train_model(proj_dir)
-    w_markdown = get_w_markdown(w)
-    cleanup(proj_dir, files)
-    if fast_mode:
-        files_out = [proj_dir / file for file in files if (proj_dir / file).exists()]
-        return w_markdown, None, None, "", files_out
-
-    my_collection, rating_markdown = process_personalized_collection(requestRetention, w)
-    difficulty_distribution_padding, difficulty_distribution = get_my_memory_states(proj_dir, dataset, my_collection)
-    fig, suggested_retention_markdown = make_plot(proj_dir, type_sequence, time_sequence, w, difficulty_distribution_padding)
-    loss_markdown = my_loss(dataset, w)
-    difficulty_distribution = difficulty_distribution.to_string().replace("\n", "\n\n")
-    markdown_out = f"""
-{suggested_retention_markdown}
+**Loss after training**: {loss_after}
+    """
+    # optimizer.calibration_graph()
+    # optimizer.compare_with_sm2()
+    markdown_out = f"""{suggested_retention_markdown}
 
 # Loss Information
 {loss_markdown}
@@ -54,12 +59,13 @@ def anki_optimizer(file, timezone, next_day_starts_at, revlog_start_date, reques
 # Ratings
 {rating_markdown}
 """
-    files_out = [proj_dir / file for file in files if (proj_dir / file).exists()]
-    return w_markdown, df_out, fig, markdown_out, files_out
+    files_out = [file for file in files if (proj_dir / file).exists()]
+    cleanup(proj_dir, files)
+    return w_markdown, markdown_out, plot_output, files_out
 
 
 description = """
-# FSRS4Anki Optimizer App - v3.14.7
+# FSRS4Anki Optimizer App - v3.24.1
 Based on the [tutorial](https://medium.com/@JarrettYe/how-to-use-the-next-generation-spaced-repetition-algorithm-fsrs-on-anki-5a591ca562e2) 
 of [Jarrett Ye](https://github.com/L-M-Sherlock). This application can give you personalized anki parameters without having to code.
 
@@ -74,7 +80,6 @@ with gr.Blocks() as demo:
             with gr.Row():
                 with gr.Column():
                     file = gr.File(label='Review Logs (Step 1)')
-                    fast_mode_in = gr.Checkbox(value=False, label="Fast Mode (Will just return the optimized weights)")
                 with gr.Column():
                     next_day_starts_at = gr.Number(value=4,
                                                    label="Next Day Starts at (Step 2)",
@@ -95,15 +100,13 @@ with gr.Blocks() as demo:
         with gr.Row():
             markdown_output = gr.Markdown()
             with gr.Column():
-                df_output = gr.DataFrame()
                 plot_output = gr.Plot()
                 files_output = gr.Files(label="Analysis Files")
     with gr.Tab("FAQ"):
         gr.Markdown(faq_markdown)
 
     btn_plot.click(anki_optimizer,
-                   inputs=[file, timezone, next_day_starts_at, revlog_start_date, requestRetention, fast_mode_in],
-                   outputs=[w_output, df_output, plot_output, markdown_output, files_output])
+                   inputs=[file, timezone, next_day_starts_at, revlog_start_date, requestRetention],
+                   outputs=[w_output, markdown_output, plot_output, files_output])
 
-if __name__ == '__main__':
-    demo.queue().launch(show_error=True)
+demo.queue().launch(show_error=True)
