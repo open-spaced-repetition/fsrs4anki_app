@@ -26,9 +26,8 @@ def anki_optimizer(file: gr.File, timezone, next_day_starts_at, revlog_start_dat
     suffix = file.name.split('/')[-1].replace(".", "_").replace("@", "_")
     proj_dir = Path(f'projects/{prefix}/{suffix}')
     proj_dir.mkdir(parents=True, exist_ok=True)
-    print(proj_dir)
     os.chdir(proj_dir)
-    proj_dir = Path('.')
+    print(os.getcwd())
     optimizer = Optimizer()
     optimizer.anki_extract(file.name)
     analysis_markdown = optimizer.create_time_series(timezone, revlog_start_date, next_day_starts_at).replace("\n", "\n\n")
@@ -59,8 +58,11 @@ def anki_optimizer(file: gr.File, timezone, next_day_starts_at, revlog_start_dat
 # Ratings
 {rating_markdown}
 """
-    files_out = [file for file in files if (proj_dir / file).exists()]
+    os.chdir('../../..')
+    files_out = [proj_dir / file for file in files if (proj_dir / file).exists()]
     cleanup(proj_dir, files)
+    print(os.getcwd())
+    print(files_out)
     return w_markdown, markdown_out, plot_output, files_out
 
 
