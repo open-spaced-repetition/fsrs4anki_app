@@ -1,6 +1,7 @@
 import gradio as gr
 import pytz
 import os
+import matplotlib.pyplot as plt
 from datetime import datetime
 from markdown import instructions_markdown, faq_markdown
 from fsrs4anki_optimizer import Optimizer
@@ -18,7 +19,11 @@ def get_w_markdown(w):
 
 
 def anki_optimizer(file: gr.File, timezone, next_day_starts_at, revlog_start_date, requestRetention,
-                   progress=gr.Progress(track_tqdm=True)):
+                   progress=gr.Progress(track_tqdm=True)):                
+    if file is None or (not file.name.endswith(".apkg") and not file.name.endswith(".colpkg")):
+        raise ValueError("Please upload a deck/collection file.")
+    if timezone == "":
+        raise ValueError("Please select a timezone.")
     now = datetime.now()
     files = ['prediction.tsv', 'revlog.csv', 'revlog_history.tsv', 'stability_for_analysis.tsv',
              'expected_time.csv', 'evaluation.tsv']
@@ -59,10 +64,10 @@ def anki_optimizer(file: gr.File, timezone, next_day_starts_at, revlog_start_dat
 {rating_markdown}
 """
     os.chdir('../../..')
+    print(os.getcwd())
     files_out = [proj_dir / file for file in files if (proj_dir / file).exists()]
     cleanup(proj_dir, files)
-    print(os.getcwd())
-    print(files_out)
+    plt.close('all')
     return w_markdown, markdown_out, plot_output, files_out
 
 
