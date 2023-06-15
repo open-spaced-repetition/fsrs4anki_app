@@ -19,7 +19,8 @@ def get_w_markdown(w):
 
 
 def anki_optimizer(file: gr.File, timezone, next_day_starts_at, revlog_start_date, requestRetention,
-                   progress=gr.Progress(track_tqdm=True)):                
+                   progress=gr.Progress(track_tqdm=True)):
+    os.chdir('/home/user/app')                
     if file is None or (not file.name.endswith(".apkg") and not file.name.endswith(".colpkg")):
         raise ValueError("Please upload a deck/collection file.")
     if timezone == "":
@@ -63,7 +64,7 @@ def anki_optimizer(file: gr.File, timezone, next_day_starts_at, revlog_start_dat
 # Ratings
 {rating_markdown}
 """
-    os.chdir('../../..')
+    os.chdir('/home/user/app')
     print(os.getcwd())
     files_out = [proj_dir / file for file in files if (proj_dir / file).exists()]
     cleanup(proj_dir, files)
