@@ -38,7 +38,7 @@ def anki_optimizer(file: gr.File, timezone, next_day_starts_at, revlog_start_dat
     optimizer.anki_extract(file.name)
     analysis_markdown = optimizer.create_time_series(timezone, revlog_start_date, next_day_starts_at).replace("\n", "\n\n")
     optimizer.define_model()
-    optimizer.train()
+    optimizer.train(verbose=False)
     w_markdown = get_w_markdown(optimizer.w)
     optimizer.predict_memory_states()
     difficulty_distribution = optimizer.difficulty_distribution.to_string().replace("\n", "\n\n")
@@ -73,7 +73,7 @@ def anki_optimizer(file: gr.File, timezone, next_day_starts_at, revlog_start_dat
 
 
 description = """
-# FSRS4Anki Optimizer App - v3.24.1
+# FSRS4Anki Optimizer App - v3.24.5
 Based on the [tutorial](https://medium.com/@JarrettYe/how-to-use-the-next-generation-spaced-repetition-algorithm-fsrs-on-anki-5a591ca562e2) 
 of [Jarrett Ye](https://github.com/L-M-Sherlock). This application can give you personalized anki parameters without having to code.
 
