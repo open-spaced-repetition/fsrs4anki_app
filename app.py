@@ -39,6 +39,7 @@ def anki_optimizer(file: gr.File, timezone, next_day_starts_at, revlog_start_dat
     analysis_markdown = optimizer.create_time_series(timezone, revlog_start_date, next_day_starts_at).replace("\n", "\n\n")
     optimizer.define_model()
     optimizer.train(verbose=False)
+    print(optimizer.w)
     w_markdown = get_w_markdown(optimizer.w)
     optimizer.predict_memory_states()
     difficulty_distribution = optimizer.difficulty_distribution.to_string().replace("\n", "\n\n")
