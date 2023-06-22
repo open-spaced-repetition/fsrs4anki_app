@@ -7,6 +7,11 @@ from markdown import instructions_markdown, faq_markdown
 from fsrs4anki_optimizer import Optimizer
 from pathlib import Path
 from utilities import cleanup
+import re
+
+with open("./requirements.txt", "r") as f:
+    txt = f.read().strip()
+    version = re.search(r"fsrs4anki_optimizer==(.*)", txt).group(1)
 
 def get_w_markdown(w):
     return f"""
@@ -73,8 +78,8 @@ def anki_optimizer(file: gr.File, timezone, next_day_starts_at, revlog_start_dat
     return w_markdown, markdown_out, plot_output, files_out
 
 
-description = """
-# FSRS4Anki Optimizer App - v3.25.0
+description = f"""
+# FSRS4Anki Optimizer App - v{version}
 Based on the [tutorial](https://medium.com/@JarrettYe/how-to-use-the-next-generation-spaced-repetition-algorithm-fsrs-on-anki-5a591ca562e2) 
 of [Jarrett Ye](https://github.com/L-M-Sherlock). This application can give you personalized anki parameters without having to code.
 
