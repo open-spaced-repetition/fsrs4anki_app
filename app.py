@@ -20,10 +20,13 @@ def get_w_markdown(w):
 
     `{w}`
     
-    Check out the Analysis tab for more detailed information."""
+    Check out the Analysis tab for more detailed information.
+    
+    **Note**: These values should be used with FSRS scheduler v4.0.0 or above.
+    """
 
 
-def anki_optimizer(file: gr.File, timezone, next_day_starts_at, revlog_start_date, requestRetention,
+def anki_optimizer(file: gr.File, timezone, next_day_starts_at, revlog_start_date, filter_out_suspended_cards, requestRetention,
                    progress=gr.Progress(track_tqdm=True)):
     os.chdir('/home/user/app')                
     if file is None or (not file.name.endswith(".apkg") and not file.name.endswith(".colpkg")):
@@ -38,11 +41,11 @@ def anki_optimizer(file: gr.File, timezone, next_day_starts_at, revlog_start_dat
     proj_dir = Path(f'projects/{prefix}/{suffix}')
     proj_dir.mkdir(parents=True, exist_ok=True)
     os.chdir(proj_dir)
-    print(os.getcwd())
     optimizer = Optimizer()
     optimizer.anki_extract(file.name)
-    analysis_markdown = optimizer.create_time_series(timezone, revlog_start_date, next_day_starts_at).replace("\n", "\n\n")
+    analysis_markdown = optimizer.create_time_series(timezone, revlog_start_date, next_day_starts_at, filter_out_suspended_cards).replace("\n", "\n\n")
     optimizer.define_model()
+    optimizer.pretrain(verbose=False)
     optimizer.train(verbose=False)
     print(optimizer.w)
     w_markdown = get_w_markdown(optimizer.w)
@@ -71,7 +74,6 @@ def anki_optimizer(file: gr.File, timezone, next_day_starts_at, revlog_start_dat
 {rating_markdown}
 """
     os.chdir('/home/user/app')
-    print(os.getcwd())
     files_out = [proj_dir / file for file in files if (proj_dir / file).exists()]
     cleanup(proj_dir, files)
     plt.close('all')
@@ -99,6 +101,7 @@ with gr.Blocks() as demo:
                                                    label="Next Day Starts at (Step 2)",
                                                    precision=0)
                     timezone = gr.Dropdown(label="Timezone (Step 3.1)", choices=pytz.all_timezones)
+                    filter_out_suspended_cards = gr.Checkbox(value=False, label="Filter out suspended cards")
                     with gr.Accordion(label="Advanced Settings (Step 3.2)", open=False):
                         requestRetention = gr.Number(value=.9, label="Desired Retention: Recommended to set between 0.8  0.9")
                         revlog_start_date = gr.Textbox(value="2006-10-05",
@@ -120,7 +123,7 @@ with gr.Blocks() as demo:
         gr.Markdown(faq_markdown)
 
     btn_plot.click(anki_optimizer,
-                   inputs=[file, timezone, next_day_starts_at, revlog_start_date, requestRetention],
+                   inputs=[file, timezone, next_day_starts_at, revlog_start_date, filter_out_suspended_cards, requestRetention],
                    outputs=[w_output, markdown_output, plot_output, files_output])
 
 demo.queue().launch(show_error=True)
