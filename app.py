@@ -4,7 +4,7 @@ import os
 import matplotlib.pyplot as plt
 from datetime import datetime
 from markdown import instructions_markdown, faq_markdown
-from fsrs4anki_optimizer import Optimizer
+from fsrs_optimizer import Optimizer
 from pathlib import Path
 from utilities import cleanup
 import re
