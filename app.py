@@ -11,7 +11,7 @@ import re
 
 with open("./requirements.txt", "r") as f:
     txt = f.read().strip()
-    version = re.search(r"fsrs4anki_optimizer==(.*)", txt).group(1)
+    version = re.search(r"FSRS-Optimizer==(.*)", txt).group(1)
 
 def get_w_markdown(w):
     return f"""

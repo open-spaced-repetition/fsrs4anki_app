@@ -1,1 +1,1 @@
-fsrs4anki_optimizer==4.3.2
+FSRS-Optimizer==4.4.2
