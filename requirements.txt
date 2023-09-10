@@ -1,1 +1,1 @@
-FSRS-Optimizer==4.13.4
+FSRS-Optimizer==4.14.1
