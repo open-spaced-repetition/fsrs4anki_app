@@ -1,7 +1,7 @@
 instructions_markdown = """
-# How to get personalized FSRS Anki parameters
+# How to get personalized FSRS parameters
 If you have been using Anki for some time and have accumulated a lot of review logs, you can try this 
-FSRS4Anki optimizer app to generate parameters for you.
+FSRS optimizer app to generate parameters for you.
 
 This is based on the amazing work of [Jarrett Ye](https://github.com/L-M-Sherlock). My goal is to further 
 democratize this technology so anyone can use it!
