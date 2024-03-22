@@ -84,7 +84,11 @@ def optimizer(
     difficulty_distribution = optimizer.difficulty_distribution.to_string().replace(
         "\n", "\n\n"
     )
-    plot_output = optimizer.find_optimal_retention()[0]
+    plot_output = optimizer.find_optimal_retention(
+        learn_span=365,  # days to learn
+        max_ivl=36500,  # days
+        loss_aversion=2.5,  # forget cost is multiplied by this factor to simulate loss aversion
+    )[0]
     suggested_retention_markdown = (
         f"""# Suggested Retention: `{optimizer.optimal_retention:.2f}`"""
     )
