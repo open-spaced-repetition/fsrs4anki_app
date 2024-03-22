@@ -1,6 +1,6 @@
 from zipfile import ZipFile
-import os
 from pathlib import Path
+import shutil
 
 
 # Extract the collection file or deck file to get the .anki21 database.
@@ -16,11 +16,14 @@ def extract(file, prefix):
 
 def cleanup(proj_dir: Path, files):
     """
-    Delete all files in prefix that dont have filenames in files
+    Delete all files/folders in prefix that dont have filenames in files
     :param proj_dir:
     :param files:
     :return:
     """
     for file in proj_dir.glob("*"):
         if file.name not in files:
-            os.remove(file)
+            if file.is_file():
+                file.unlink()
+            else:
+                shutil.rmtree(file)
