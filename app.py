@@ -93,6 +93,7 @@ def optimizer(
     except:
         print("Failed to find optimal retention")
         optimizer.optimal_retention = 0.9
+        plot_output = None
     suggested_retention_markdown = (
         f"""# Suggested Retention: `{optimizer.optimal_retention:.2f}`"""
     )
