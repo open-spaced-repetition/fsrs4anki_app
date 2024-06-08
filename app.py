@@ -118,7 +118,7 @@ def optimizer(
 {rating_markdown}
 """
     os.chdir(home_path)
-    files_out = [proj_dir / file for file in files if (proj_dir / file).exists()]
+    files_out = [str(proj_dir / file) for file in files if (proj_dir / file).exists()]
     cleanup(proj_dir, files)
     plt.close("all")
     return w_markdown, markdown_out, plot_output, files_out
@@ -134,9 +134,9 @@ Read the `Instructions` if its your first time using the app.
 
 with gr.Blocks() as demo:
     with gr.Tab("FSRS Optimizer"):
-        with gr.Box():
+        with gr.Group():
             gr.Markdown(description)
-        with gr.Box():
+        with gr.Group():
             with gr.Row():
                 with gr.Column():
                     file = gr.File(label="Review Logs (Step 1)")
@@ -164,7 +164,7 @@ with gr.Blocks() as demo:
         with gr.Row():
             w_output = gr.Markdown()
     with gr.Tab("Instructions"):
-        with gr.Box():
+        with gr.Group():
             gr.Markdown(instructions_markdown)
     with gr.Tab("Analysis"):
         with gr.Row():
