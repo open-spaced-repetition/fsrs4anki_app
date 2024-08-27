@@ -26,7 +26,7 @@ def get_w_markdown(w):
     
     Check out the Analysis tab for more detailed information.
     
-    **Note**: These values should be used with FSRS scheduler v4.0.0 or above.
+    **Note**: These values should be used with FSRS scheduler v5.0.0 or above.
     """
 
 
