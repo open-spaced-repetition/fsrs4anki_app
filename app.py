@@ -37,6 +37,8 @@ def optimizer(
     revlog_start_date,
     filter_out_suspended_cards,
     requestRetention,
+    enable_short_term,
+    recency_weight,
     progress=gr.Progress(track_tqdm=True),
 ):
     os.chdir(home_path)
@@ -50,7 +52,7 @@ def optimizer(
         raise ValueError(
             "File must be an Anki deck/collection file (.apkg or .colpkg) or a csv file."
         )
-    if timezone == "":
+    if not timezone:
         raise ValueError("Please select a timezone.")
     now = datetime.now()
     files = [
@@ -66,7 +68,7 @@ def optimizer(
     proj_dir = Path(f"projects/{prefix}/{suffix}")
     proj_dir.mkdir(parents=True, exist_ok=True)
     os.chdir(proj_dir)
-    optimizer = Optimizer()
+    optimizer = Optimizer(enable_short_term=enable_short_term)
     if mode == "anki":
         optimizer.anki_extract(file.name, filter_out_suspended_cards)
     else:
@@ -77,7 +79,7 @@ def optimizer(
     ).replace("\n", "\n\n")
     optimizer.define_model()
     optimizer.pretrain(verbose=False)
-    optimizer.train(verbose=False)
+    optimizer.train(verbose=False, recency_weight=recency_weight)
     print(optimizer.w)
     w_markdown = get_w_markdown(optimizer.w)
     optimizer.predict_memory_states()
@@ -159,6 +161,13 @@ with gr.Blocks() as demo:
                             value="2006-10-05",
                             label="Revlog Start Date: Optimize review logs after this date.",
                         )
+                        enable_short_term = gr.Checkbox(
+                            value=True,
+                            label="Enable short-term component in FSRS model",
+                        )
+                        recency_weight = gr.Checkbox(
+                            value=True, label="Enable recency weight in training"
+                        )
         with gr.Row():
             btn_plot = gr.Button("Optimize!")
         with gr.Row():
@@ -184,6 +193,8 @@ with gr.Blocks() as demo:
             revlog_start_date,
             filter_out_suspended_cards,
             requestRetention,
+            enable_short_term,
+            recency_weight,
         ],
         outputs=[w_output, markdown_output, plot_output, files_output],
     )
